@@ -42,8 +42,8 @@
         </div>
         <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Register</button>
     </form>
-    <p class="mt-4 text-center">Sudah punya akun?</p>
-    <a href="{{ route('login') }}">Login</a>
+    <p class="mt-4 text-center">Sudah punya akun? <a href="{{ route('login') }}">Login</a></p>
+
 </body>
 
 </html>
