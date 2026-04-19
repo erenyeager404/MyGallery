@@ -21,14 +21,14 @@ class AuthController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
         ]);
-        $user = user::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'is_admin' => false,
         ]);
         Auth::login($user);
-        return redirect()->route('dashboard')->with('Sukses, Registrasi berhasil');
+        return redirect()->route('dashboard')->with('Sukses', 'Registrasi berhasil');
     }
 
     //LOGIN
