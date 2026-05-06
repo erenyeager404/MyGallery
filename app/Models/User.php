@@ -16,6 +16,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'last_login_at', // opsional, kalau nanti ingin diisi manual
     ];
     protected $hidden = [
         'password',
