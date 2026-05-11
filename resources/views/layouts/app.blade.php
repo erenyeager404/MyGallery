@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Memora — {{ $title ?? 'Dashboard' }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-950 text-white min-h-screen flex">
+
+    // Menu //
+    <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full z-10">
+        <div class="p-6 border-b border-gray-800">
+            <h1 class="text-2xl font-bold text-white tracking-tight">
+                Our<span class="text-violet-400">Memora</span>
+            </h1>
+            <p class="text-xs text-gray-500 mt-1">Selamat datang, {{ auth()->user()->name }}</p>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1">
+            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      {{ request()->routeIs('dashboard') ? 'bg-violet-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}
+                      transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+            </a>
+
+            <a href="{{ route('profile') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      {{ request()->routeIs('profile') ? 'bg-violet-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}
+                      transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Profile
+            </a>
+
+            <a href="{{ route('saved') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      {{ request()->routeIs('saved') ? 'bg-violet-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' }}
+                      transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                Saved Photos
+            </a>
+
+            {{-- Tombol Upload besar --}}
+            <a href="{{ route('upload') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm
+                      bg-violet-500 hover:bg-violet-600 text-white transition-colors mt-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Upload Foto
+            </a>
+        </nav>
+
+        //Logout//
+        <div class="p-4 border-t border-gray-800">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit"
+                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-gray-400 hover:bg-red-900/30 hover:text-red-400 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="ml-64 flex-1 p-8">
+        @if(session('success'))
+            <div class="mb-6 px-4 py-3 bg-green-900/40 border border-green-700 text-green-300 rounded-xl text-sm">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @yield('content')
+    </main>
+
+</body>
+
+</html>
