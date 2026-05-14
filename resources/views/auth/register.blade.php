@@ -1,56 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Gallery</title>
+    <title>Daftar — OurGallery</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold mb-6">Register</h1>
+<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold">Our<span class="text-violet-400">Gallery</span></h1>
+            <p class="text-gray-400 mt-2">Buat akun baru</p>
+        </div>
 
-        @if ($errors->any())
-            <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form action="{{ route('register') }}" method="POST">
+        <form method="POST" action="{{ route('register') }}" class="space-y-4">
             @csrf
-            <div class="mb-4">
-                <label class="block text-gray-700">Nama</label>
-                <input type="text" name="name" value="{{ old('name') }}" required placeholder="Budi Setia Kawan"
-                    class="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500">
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Nama</label>
+                <input type="text" name="name" value="{{ old('name') }}"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    placeholder="Nama kamu">
+                {{-- ↑ old('name') = isi ulang field dengan input sebelumnya jika ada error --}}
+                @error('name')
+                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                @enderror
+                {{-- ↑ @error('name') = tampilkan pesan error validasi untuk field 'name' --}}
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Email</label>
-                <input type="email" name="email" value="{{ old('email') }}" required placeholder="budi@gmail.com"
-                    class="w-full border rounded p-2">
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Email</label>
+                <input type="email" name="email" value="{{ old('email') }}"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    placeholder="email@kamu.com">
+                @error('email')
+                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Password</label>
-                <input type="password" name="password" required placeholder="••••••" class="w-full border rounded p-2">
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Password</label>
+                <input type="password" name="password"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    placeholder="Minimal 6 karakter">
+                @error('password')
+                    <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
-            <div class="mb-4">
-                <label class="block text-gray-700">Konfirmasi Password</label>
-                <input type="password" name="password_confirmation" required placeholder="••••••"
-                    class="w-full border rounded p-2">
+
+            <div>
+                <label class="block text-sm text-gray-400 mb-1">Konfirmasi Password</label>
+                <input type="password" name="password_confirmation"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition-colors"
+                    placeholder="Ulangi password">
             </div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-                Register
+
+            <button type="submit"
+                class="w-full py-3 bg-violet-600 hover:bg-violet-700 rounded-xl font-medium transition-colors mt-2">
+                Daftar Sekarang
             </button>
         </form>
 
-        <p class="mt-4 text-center">
+        <p class="text-center text-gray-400 text-sm mt-6">
             Sudah punya akun?
-            <a href="{{ route('login') }}" class="text-blue-600">Login</a>
+            <a href="{{ route('login') }}" class="text-violet-400 hover:underline">Login di sini</a>
         </p>
     </div>
 </body>

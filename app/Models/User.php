@@ -1,15 +1,14 @@
 <?php
 
-
 namespace App\Models;
 
-
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -18,37 +17,50 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
-        'last_login',
+        'last_login_at',
     ];
 
     protected $hidden = [
         'password',
-        'remember_token'
+        'remember_token',
     ];
 
-    protected $cast = [
+    protected $casts = [
         'is_admin' => 'boolean',
         'last_login_at' => 'datetime',
+        'email_verified_at' => 'datetime',
     ];
+
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification());
+
+    }
+
+    // ===== RELASI =====
 
     public function photos()
     {
         return $this->hasMany(Photo::class);
+
     }
 
     public function likes()
     {
         return $this->hasMany(Like::class);
-        ;
+
     }
 
     public function saves()
     {
         return $this->hasMany(Save::class);
+
     }
 
     public function comments()
     {
         return $this->hasMany(Comment::class);
+
     }
 }

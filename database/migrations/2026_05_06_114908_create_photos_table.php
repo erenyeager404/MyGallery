@@ -16,7 +16,7 @@ return new class extends Migration {
             $table->string('file_path');
             $table->string('caption');
             $table->text('description')->nullable();
-            $table->enum('status', ['publik', 'private'])->default('publik');
+            $table->enum('status', ['public', 'private'])->default('public');
             $table->timestamps();
         });
     }

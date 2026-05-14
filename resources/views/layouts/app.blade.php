@@ -61,7 +61,7 @@
             </a>
         </nav>
 
-        //Logout//
+
         <div class="p-4 border-t border-gray-800">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
