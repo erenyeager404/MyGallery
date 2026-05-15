@@ -35,6 +35,7 @@ class AuthController extends Controller
         ]);
 
         Auth::login($user);
+        $request->session()->regenerate();
         $user->sendEmailVerificationNotification();
         return redirect()->route('verification.notice')
             ->with('success', 'Registrasi berhasil! Silahkan cek email untuk verifikasi.');
@@ -64,18 +65,11 @@ class AuthController extends Controller
             if (!auth()->user()->hasVerifiedEmail()) {
                 // Kirim ulang email verifikasi otomatis
                 auth()->user()->sendEmailVerificationNotification();
-
-                // Logout dulu biar tidak bisa akses halaman lain
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                // Redirect ke login dengan pesan peringatan
-                return redirect()->route('login')->with(
+                return redirect()->route('verification.notice')->with(
                     'warning',
                     'Email kamu belum diverifikasi. Kami sudah kirim ulang link verifikasi, cek email kamu.'
                 );
-                // ↑ Cara ini lebih aman — user harus verifikasi dulu baru bisa login
+
             }
 
             // Update waktu login terakhir
@@ -91,7 +85,7 @@ class AuthController extends Controller
 
         return back()->withErrors([
             'email' => 'Email atau password salah.',
-        ]);
+        ])->withInput($request->only('email'));
     }
     // logout
 

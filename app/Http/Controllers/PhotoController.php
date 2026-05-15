@@ -30,6 +30,17 @@ class PhotoController extends Controller
         return view('upload');
     }
 
+    public function download(Photo $photo)
+    {
+        if ($photo->status == 'private' && $photo->user_id !== auth()->id()) {
+            abort(403, 'Foto ini private.');
+        }
+        $path = Storage::disk('public')->path($photo->file_path);
+        $filename = $photo->caption . '.' . pathinfo($path, PATHINFO_EXTENSION);
+        return response()->download($path, $filename);
+    }
+
+
     public function upload(Request $request)
     {
         $request->validate([

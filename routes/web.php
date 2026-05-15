@@ -68,6 +68,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/photos/{photo}/like', [LikeController::class, 'toggle'])->name('photos.like');
     Route::post('/photos/{photo}/save', [SaveController::class, 'toggle'])->name('photos.save');
     Route::post('/photos/{photo}/comment', [CommentController::class, 'store'])->name('photos.comment');
+
+    //Foto Download
+    Route::get('/photos/{photo}/download', [PhotoController::class, 'download'])->name('photos.download');
+
 });
 
 // Admin routes

@@ -31,11 +31,11 @@
 
                             <div class="flex items-center gap-3 pt-3 border-t border-gray-800">
 
-
+                                <!-- Tombol like -->
                                 <button onclick="toggleLike({{ $photo->id }}, this)"
                                     data-liked="{{ $photo->isLikedBy(auth()->id()) ? 'true' : 'false' }}"
                                     class="flex items-center gap-1.5 text-xs transition-colors
-                                                       {{ $photo->isLikedBy(auth()->id()) ? 'text-red-400' : 'text-gray-400 hover:text-red-400' }}">
+                                                                                                                               {{ $photo->isLikedBy(auth()->id()) ? 'text-red-400' : 'text-gray-400 hover:text-red-400' }}">
 
                                     <svg class="w-4 h-4" fill="{{ $photo->isLikedBy(auth()->id()) ? 'currentColor' : 'none' }}"
                                         stroke="currentColor" viewBox="0 0 24 24">
@@ -45,11 +45,11 @@
                                     <span class="like-count">{{ $photo->likes->count() }}</span>
                                 </button>
 
-
+                                <!-- Tombol save -->
                                 <button onclick="toggleSave({{ $photo->id }}, this)"
                                     data-saved="{{ $photo->isSavedBy(auth()->id()) ? 'true' : 'false' }}"
                                     class="flex items-center gap-1.5 text-xs transition-colors
-                                                       {{ $photo->isSavedBy(auth()->id()) ? 'text-violet-400' : 'text-gray-400 hover:text-violet-400' }}">
+                                                                                                                               {{ $photo->isSavedBy(auth()->id()) ? 'text-violet-400' : 'text-gray-400 hover:text-violet-400' }}">
                                     <svg class="w-4 h-4" fill="{{ $photo->isSavedBy(auth()->id()) ? 'currentColor' : 'none' }}"
                                         stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -58,6 +58,7 @@
                                     Save
                                 </button>
 
+                                <!-- Tombol Comment -->
                                 <button onclick="toggleComment({{ $photo->id }})"
                                     class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-blue-400 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +66,16 @@
                                             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                     </svg>
                                     <span>{{ $photo->comments->count() }}</span>
+
                                 </button>
+                                <!-- Tombol download -->
+                                <a href="{{ route('photos.download', $photo) }}"
+                                    class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-green-400 transition-colors m1-auto">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </a>
 
                             </div>
 
@@ -172,7 +182,7 @@
             const div = document.createElement('div');
             div.className = 'text-xs';
             div.innerHTML = `<span class="text-violet-400 font-medium">${data.comment.user_name}</span>
-                         <span class="text-gray-300 ml-1">${data.comment.body}</span>`;
+                                                 <span class="text-gray-300 ml-1">${data.comment.body}</span>`;
             list.appendChild(div);
 
 
