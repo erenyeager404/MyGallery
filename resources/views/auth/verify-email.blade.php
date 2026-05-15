@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verifikasi Email — MyGallery</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
@@ -42,7 +42,7 @@
         {{-- Flash: registrasi berhasil --}}
         @if(session('success'))
             <div class="mb-5 px-4 py-3 bg-green-900/40 border border-green-700
-                            text-green-300 rounded-xl text-sm">
+                                text-green-300 rounded-xl text-sm">
                 {{ session('success') }}
             </div>
         @endif
@@ -50,7 +50,7 @@
         {{-- Flash: kirim ulang berhasil --}}
         @if(session('message'))
             <div class="mb-5 px-4 py-3 bg-blue-900/40 border border-blue-700
-                            text-blue-300 rounded-xl text-sm">
+                                text-blue-300 rounded-xl text-sm">
                 {{ session('message') }}
             </div>
         @endif

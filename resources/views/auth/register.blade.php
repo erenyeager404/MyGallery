@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar — OurGallery</title>
+    <title>Daftar — OurMemora</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="bg-gray-950 text-white min-h-screen flex items-center justify-center">
     <div class="w-full max-w-md p-8">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold">Our<span class="text-violet-400">Gallery</span></h1>
+            <h1 class="text-3xl font-bold">Our<span class="text-violet-400">Memora</span></h1>
             <p class="text-gray-400 mt-2">Buat akun baru</p>
         </div>
 

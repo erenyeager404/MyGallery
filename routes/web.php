@@ -79,3 +79,5 @@ Route::middleware(['auth', 'verified', 'is_admin'])
         Route::get('/engagement', [EngagementController::class, 'index'])->name('engagement');
         Route::delete('/photos/{photo}', [PhotoController::class, 'destroy'])->name('photos.destroy');
     });
+
+
