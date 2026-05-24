@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,15 +9,14 @@ return new class extends Migration {
         Schema::create('follows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('follower_id')->constrained('users')->cascadeOnDelete();
-            // ↑ User yang mengikuti
+            // yang follow
             $table->foreignId('following_id')->constrained('users')->cascadeOnDelete();
-            // ↑ User yang diikuti
+            // yang di-follow
             $table->unique(['follower_id', 'following_id']);
-            // ↑ Tidak bisa follow orang yang sama dua kali
+            // tidak bisa follow orang yang sama 2x
             $table->timestamps();
         });
     }
-
     public function down(): void
     {
         Schema::dropIfExists('follows');
