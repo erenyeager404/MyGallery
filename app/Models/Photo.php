@@ -1,51 +1,20 @@
 <?php
-
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Photo extends Model
+class PhotoFile extends Model
 {
-    use HasFactory;
+    protected $fillable = ['photo_id', 'file_path', 'order'];
 
-    protected $fillable = [
-        'user_id',
-        'file_path',
-        'caption',
-        'description',
-        'status',
-        'views',
-    ];
-
-    public function user()
+    public function photo()
     {
-        return $this->belongsTo(User::class);
-    }
-    public function likes(
-
-    ) {
-        return $this->hasMany(Like::class);
+        return $this->belongsTo(Photo::class);
     }
 
-    public function comments()
+    // Helper: URL lengkap file
+    public function getUrlAttribute(): string
     {
-        return $this->hasMany(Comment::class)->latest();
-    }
-
-    public function saves()
-    {
-        return $this->hasMany(Save::class);
-    }
-
-
-    public function isLikedBy($userId)
-    {
-        return $this->likes()->where('user_id', $userId)->exists();
-    }
-
-    public function isSavedBy($userId)
-    {
-        return $this->saves()->where('user_id', $userId)->exists();
+        return asset('storage/' . $this->file_path);
     }
 }
