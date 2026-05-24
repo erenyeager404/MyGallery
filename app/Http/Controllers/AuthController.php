@@ -1,7 +1,7 @@
 <?php
+namespace App\Http\Controllers\Auth;
 
-namespace App\Http\Controllers;
-
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,43 +9,27 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // ===== REGISTER =====
-
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
+    // ── Register ────────────────────────────────
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
-            // ↑ Hapus unique:users dari sini
-            // Kita handle sendiri di bawah agar lebih fleksibel
             'password' => 'required|min:6|confirmed',
         ]);
 
-        // Cek apakah email sudah terdaftar
-        $existingUser = User::where('email', $request->email)->first();
-
-        if ($existingUser) {
-            if ($existingUser->hasVerifiedEmail()) {
-                // Email sudah terdaftar DAN sudah diverifikasi
-                // → Tolak registrasi, suruh login
-                return redirect()->route('landing')->withErrors([
-                    'email' => 'Email ini sudah terdaftar. Silahkan login.'
-                ])->withInput($request->only('name', 'email'));
-            } else {
-                // Email sudah terdaftar TAPI belum diverifikasi
-                // → Hapus akun lama, buat akun baru dengan data terbaru
-                $existingUser->delete();
-                // ↑ Hapus akun lama yang belum terverifikasi
-                // Anggap akun itu tidak valid karena tidak pernah dikonfirmasi
+        // Handle email sudah ada tapi belum verifikasi
+        $existing = User::where('email', $request->email)->first();
+        if ($existing) {
+            if ($existing->hasVerifiedEmail()) {
+                return redirect()->route('landing')
+                    ->withErrors(['email' => 'Email sudah terdaftar. Silahkan login.'])
+                    ->withInput($request->only('name', 'email'));
             }
+            // Hapus akun lama yang belum diverifikasi
+            $existing->delete();
         }
 
-        // Buat akun baru
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -57,16 +41,10 @@ class AuthController extends Controller
         $user->sendEmailVerificationNotification();
 
         return redirect()->route('verification.notice')
-            ->with('success', 'Registrasi berhasil! Silahkan cek email untuk verifikasi.');
+            ->with('success', 'Registrasi berhasil! Cek email untuk verifikasi.');
     }
 
-    // ===== LOGIN =====
-
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
-
+    // ── Login ────────────────────────────────────
     public function login(Request $request)
     {
         $request->validate([
@@ -74,45 +52,81 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-
-            $request->session()->regenerate();
-
-            // Cek verifikasi email
-            if (!auth()->user()->hasVerifiedEmail()) {
-
-
-
-                return redirect()->route('verification.notice')
-                    ->with('warning', 'Email kamu belum diverifikasi. Cek inbox kamu.');
-            }
-
-            // Update waktu login terakhir
-            auth()->user()->update(['last_login_at' => now()]);
-
-            // Redirect sesuai role
-            if (auth()->user()->is_admin) {
-                return redirect()->route('admin.dashboard');
-            }
-
-            return redirect()->route('dashboard');
+        if (
+            !Auth::attempt(
+                $request->only('email', 'password'),
+                $request->boolean('remember')
+            )
+        ) {
+            return redirect()->route('landing')
+                ->withErrors(['email' => 'Email atau password salah.'])
+                ->withInput($request->only('email'));
         }
 
-        return redirect()->route('landing')->withErrors([
-            'email' => 'Email atau password salah.',
-        ])->withInput($request->only('email'));
+        $request->session()->regenerate();
+
+        if (!auth()->user()->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice')
+                ->with('warning', 'Email belum diverifikasi. Cek inbox kamu.');
+        }
+
+        auth()->user()->update(['last_login_at' => now()]);
+
+        return redirect()->intended(
+            auth()->user()->is_admin
+            ? route('admin.dashboard')
+            : route('dashboard')
+        );
     }
 
-    // ===== LOGOUT =====
-
+    // ── Logout ───────────────────────────────────
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return redirect()->route('landing');
+    }
+
+    // ── Google OAuth ─────────────────────────────
+    public function redirectToGoogle()
+    {
+        return \Laravel\Socialite\Facades\Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = \Laravel\Socialite\Facades\Socialite::driver('google')->user();
+        } catch (\Exception $e) {
+            return redirect()->route('landing')
+                ->withErrors(['email' => 'Login Google gagal, coba lagi.']);
+        }
+
+        $user = User::where('google_id', $googleUser->getId())
+            ->orWhere('email', $googleUser->getEmail())
+            ->first();
+
+        if ($user) {
+            $user->update([
+                'google_id' => $googleUser->getId(),
+                'email_verified_at' => $user->email_verified_at ?? now(),
+            ]);
+        } else {
+            $user = User::create([
+                'name' => $googleUser->getName(),
+                'email' => $googleUser->getEmail(),
+                'google_id' => $googleUser->getId(),
+                'password' => null,
+                'email_verified_at' => now(),
+            ]);
+        }
+
+        Auth::login($user);
+        $user->update(['last_login_at' => now()]);
+
+        return redirect()->intended(
+            $user->is_admin ? route('admin.dashboard') : route('dashboard')
+        );
     }
 }
