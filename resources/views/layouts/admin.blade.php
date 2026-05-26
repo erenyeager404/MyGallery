@@ -11,44 +11,39 @@
 </head>
 
 <body class="bg-gray-950 text-white min-h-screen flex">
-
     <div class="fixed inset-0 z-0 bg-gray-950"></div>
 
-    <aside class="sidebar sidebar-admin" id="sidebar">
+    <aside class="sidebar sidebar-admin">
         <div class="sidebar-logo-area">
             <a href="{{ route('admin.dashboard') }}" class="relative w-full flex items-center justify-center">
-                <span class="sidebar-logo-short text-red-400">M</span>
-                <span class="sidebar-logo-full">
-                    Our<span class="text-red-400">Memora</span>
-                </span>
+                <span class="sidebar-logo-icon text-red-400">M</span>
+                <span class="sidebar-logo-full">Our<span class="text-red-400">Memora</span></span>
             </a>
         </div>
-
-        <nav class="flex-1 py-4 space-y-1">
+        <nav class="flex-1 py-3 space-y-0.5">
             @php
-                $adminNav = [
+                $nav = [
                     ['route' => 'admin.dashboard', 'icon' => '⊞', 'label' => 'Dashboard'],
                     ['route' => 'admin.engagement', 'icon' => '⎇', 'label' => 'Engagement'],
                     ['route' => 'profile', 'icon' => '◉', 'label' => 'Profile'],
                 ];
             @endphp
-            @foreach($adminNav as $item)
+            @foreach($nav as $item)
                 <a href="{{ route($item['route']) }}" data-tooltip="{{ $item['label'] }}"
-                    class="nav-item {{ request()->routeIs($item['route']) ? 'nav-item-admin active' : '' }}">
+                    class="nav-item {{ request()->routeIs($item['route']) ? 'active' : '' }}">
                     <span class="nav-item-icon">{{ $item['icon'] }}</span>
                     <span class="nav-label">{{ $item['label'] }}</span>
                 </a>
             @endforeach
         </nav>
-
-        <div class="border-t border-red-900/20 p-3">
-            <div class="nav-item" data-tooltip="Administrator">
+        <div class="border-t border-red-900/20 p-2">
+            <div class="nav-item" data-tooltip="Admin">
                 <span class="nav-item-icon text-red-400">⬡</span>
                 <span class="nav-label text-xs text-red-400">Administrator</span>
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" data-tooltip="Logout" class="nav-item w-full text-left hover:text-red-400 mt-1">
+                <button type="submit" data-tooltip="Logout" class="nav-item w-full hover:text-red-400">
                     <span class="nav-item-icon">⇥</span>
                     <span class="nav-label">Logout</span>
                 </button>
@@ -62,7 +57,6 @@
         @endif
         @yield('content')
     </main>
-
     @stack('scripts')
 </body>
 

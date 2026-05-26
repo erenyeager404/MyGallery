@@ -1,42 +1,32 @@
-.photo-detail-wrap {
-    @apply max-w-5xl mx-auto;
-}
-
 .photo-detail-grid {
     @apply grid grid-cols-1 lg:grid-cols-2 gap-8 items-start;
 }
 
-.photo-main-img {
+.photo-main-frame {
     @apply rounded-2xl overflow-hidden border border-white/10 relative;
 }
 
-.thumbnail-strip {
+.thumb-strip {
     @apply flex gap-2 mt-3 overflow-x-auto pb-2;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
 }
 
-.thumbnail-strip::-webkit-scrollbar {
-    display: none;
-}
-
-.thumbnail-item {
+.thumb-item {
     @apply flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 border-transparent transition-all cursor-pointer;
+
+    &.active {
+        @apply border-violet-500;
+    }
 }
 
-.thumbnail-item.active {
-    @apply border-violet-500;
-}
-
-.photo-info-panel {
-    @apply flex flex-col h-full;
+.info-panel {
+    @apply flex flex-col;
 }
 
 .uploader-row {
     @apply flex items-center justify-between mb-5;
 }
 
-.uploader-avatar {
+.uploader-av {
     @apply w-10 h-10 rounded-full object-cover ring-2 ring-violet-500/30;
 }
 
@@ -48,15 +38,15 @@
     @apply text-gray-400 text-sm mb-4 leading-relaxed;
 }
 
-.photo-stats-row {
+.stats-row {
     @apply flex items-center gap-6 py-4 border-y border-white/10 mb-4;
 }
 
-.stat-item-btn {
+.stat-btn {
     @apply flex items-center gap-2 text-sm transition-colors;
 }
 
-.photo-actions-row {
+.photo-actions {
     @apply flex gap-2 mb-5;
 }
 
@@ -65,22 +55,17 @@
 }
 
 .comments-list {
-    @apply flex-1 overflow-y-auto max-h-60 space-y-3 mb-4 pr-1 scrollbar-thin scrollbar-thumb-gray-700;
+    @apply overflow-y-auto max-h-64 space-y-3 mb-4;
 }
 
-.comment-detail-item {
+.comment-d-item {
     @apply flex gap-3;
 }
 
-.comment-detail-avatar {
+.comment-d-av {
     @apply w-7 h-7 rounded-full flex-shrink-0 object-cover;
 }
 
-.comment-detail-input-wrap {
+.comment-d-input {
     @apply flex gap-2 mt-auto;
-}
-
-/* Photo detail as page with bg photo */
-.photo-page-layout {
-    @apply relative min-h-screen;
 }

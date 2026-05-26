@@ -11,7 +11,6 @@ class LikeController extends Controller
     {
         $like = Like::where('user_id', auth()->id())
             ->where('photo_id', $photo->id)->first();
-
         if ($like) {
             $like->delete();
             $liked = false;
@@ -19,10 +18,6 @@ class LikeController extends Controller
             Like::create(['user_id' => auth()->id(), 'photo_id' => $photo->id]);
             $liked = true;
         }
-
-        return response()->json([
-            'liked' => $liked,
-            'total' => $photo->likes()->count(),
-        ]);
+        return response()->json(['liked' => $liked, 'total' => $photo->likes()->count()]);
     }
 }

@@ -11,7 +11,6 @@ class DashboardController extends Controller
         $photos = Photo::where('status', 'public')
             ->with(['user', 'files', 'likes', 'saves', 'comments'])
             ->latest()->paginate(20);
-
         return view('admin.dashboard', compact('photos'));
     }
 }

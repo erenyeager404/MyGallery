@@ -1,80 +1,49 @@
-<div id="authModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm"
-    onclick="handleModalBackdrop(event)">
-
-    <div class="bg-gray-900 border border-gray-700/50 rounded-2xl shadow-2xl w-full max-w-md mx-4">
-
+<div id="authModal" class="modal-backdrop" onclick="if(event.target===this)closeModal()">
+    <div class="modal-box">
         <div class="p-6 pb-0">
             <div class="flex items-center justify-between mb-5">
-                <span class="text-xl font-bold">My<span class="text-violet-400">Gallery</span></span>
-                <button onclick="closeAuthModal()" class="w-8 h-8 flex items-center justify-center text-gray-500
-                               hover:text-white hover:bg-gray-800 rounded-lg transition-colors text-lg">
-                    &#10005;
-                </button>
+                <span class="text-lg font-bold">Our<span class="text-violet-400">Memora</span></span>
+                <button onclick="closeModal()" class="modal-close">✕</button>
             </div>
-
-            <div id="modalContextMsg" class="hidden mb-4 px-4 py-3 bg-violet-950/60 border border-violet-800/50
-                        rounded-xl text-sm text-violet-300">
-            </div>
-
-            <div class="flex gap-1 p-1 bg-gray-800/60 rounded-xl mb-5">
-                <button id="tabLogin" onclick="switchTab('login')"
-                    class="flex-1 py-2 rounded-lg text-sm font-medium transition-all bg-violet-600 text-white">
-                    Masuk
-                </button>
-                <button id="tabRegister" onclick="switchTab('register')"
-                    class="flex-1 py-2 rounded-lg text-sm font-medium transition-all text-gray-400 hover:text-white">
-                    Daftar
-                </button>
+            <div id="modalCtx" class="context-banner hidden"></div>
+            <div class="tab-switcher mb-5">
+                <button id="tLogin" onclick="switchTab('login')" class="tab-btn active">Masuk</button>
+                <button id="tReg" onclick="switchTab('register')" class="tab-btn">Daftar</button>
             </div>
         </div>
 
-        {{-- Form Login --}}
-        <div id="formLogin" class="px-6 pb-6">
+        {{-- LOGIN --}}
+        <div id="fLogin" class="px-6 pb-6">
             <form method="POST" action="{{ route('login') }}" class="space-y-4">
                 @csrf
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1.5">Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="email@kamu.com" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                  text-sm text-white placeholder-gray-600 focus:outline-none
-                                  focus:border-violet-500 transition-colors">
-                    @error('email')
-                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="email@kamu.com"
+                        class="form-input">
+                    @error('email') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1.5">Password</label>
+                    <label class="form-label">Password</label>
                     <div class="relative">
-                        <input type="password" name="password" id="loginPassword" placeholder="••••••••" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                      text-sm text-white placeholder-gray-600 focus:outline-none
-                                      focus:border-violet-500 transition-colors pr-10">
-                        <button type="button" onclick="togglePw('loginPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500
-                                       hover:text-gray-300 transition-colors text-sm">
+                        <input type="password" name="password" id="lPw" placeholder="••••••••" class="form-input pr-10">
+                        <button type="button" onclick="togglePw('lPw')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-sm">
                             &#128065;
                         </button>
                     </div>
-                    @error('password')
-                        <p class="text-red-400 text-xs mt-1">{{ $message }}</p>
-                    @enderror
+                    @error('password') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" name="remember" id="remember" class="w-4 h-4 accent-violet-500">
-                    <label for="remember" class="text-xs text-gray-400">Ingat saya</label>
+                    <input type="checkbox" name="remember" id="rem" class="w-4 h-4 accent-violet-500">
+                    <label for="rem" class="text-xs text-gray-400">Ingat saya</label>
                 </div>
-                <button type="submit"
-                    class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 rounded-xl text-sm font-medium transition-colors">
-                    Masuk
-                </button>
+                <button type="submit" class="btn-submit">Masuk</button>
             </form>
-
             <div class="flex items-center gap-3 my-4">
-                <hr class="flex-1 border-gray-800">
-                <span class="text-gray-600 text-xs">atau</span>
+                <hr class="flex-1 border-gray-800"><span class="text-gray-600 text-xs">atau</span>
                 <hr class="flex-1 border-gray-800">
             </div>
-
-            <a href="{{ route('auth.google') }}" class="w-full flex items-center justify-center gap-2.5 py-2.5
-                      bg-gray-800 hover:bg-gray-700 border border-gray-700
-                      rounded-xl text-sm text-gray-300 transition-colors">
+            <a href="{{ route('auth.google') }}" class="btn-google">
                 <svg width="16" height="16" viewBox="0 0 48 48">
                     <path fill="#EA4335"
                         d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
@@ -87,65 +56,55 @@
                 </svg>
                 Lanjutkan dengan Google
             </a>
-
             <p class="text-center text-gray-600 text-xs mt-4">
-                Belum punya akun?
-                <button onclick="switchTab('register')" class="text-violet-400 hover:underline">Daftar sekarang</button>
+                Belum punya akun? <button onclick="switchTab('register')"
+                    class="text-violet-400 hover:underline">Daftar</button>
             </p>
         </div>
 
-        {{-- Form Register --}}
-        <div id="formRegister" class="px-6 pb-6 hidden">
+        {{-- REGISTER --}}
+        <div id="fReg" class="px-6 pb-6 hidden">
             <form method="POST" action="{{ route('register') }}" class="space-y-3">
                 @csrf
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1.5">Nama lengkap</label>
-                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama kamu" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                  text-sm text-white placeholder-gray-600 focus:outline-none
-                                  focus:border-violet-500 transition-colors">
-                    @error('name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    <label class="form-label">Nama</label>
+                    <input type="text" name="name" value="{{ old('name') }}" placeholder="Nama kamu" class="form-input">
+                    @error('name') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1.5">Email</label>
-                    <input type="email" name="email" value="{{ old('email') }}" placeholder="email@kamu.com" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                  text-sm text-white placeholder-gray-600 focus:outline-none
-                                  focus:border-violet-500 transition-colors">
-                    @error('email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" value="{{ old('email') }}" placeholder="email@kamu.com"
+                        class="form-input">
+                    @error('email') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1.5">Password</label>
+                    <label class="form-label">Password</label>
                     <div class="relative">
-                        <input type="password" name="password" id="regPassword" placeholder="Minimal 6 karakter"
-                            oninput="checkStrength(this.value)" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                      text-sm text-white placeholder-gray-600 focus:outline-none
-                                      focus:border-violet-500 transition-colors pr-10">
-                        <button type="button" onclick="togglePw('regPassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500
-                                       hover:text-gray-300 transition-colors text-sm">
+                        <input type="password" name="password" id="rPw" placeholder="Min. 6 karakter"
+                            oninput="checkStrength(this.value)" class="form-input pr-10">
+                        <button type="button" onclick="togglePw('rPw')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 text-sm">
                             &#128065;
                         </button>
                     </div>
                     <div class="flex gap-1 mt-1.5">
-                        <div id="str1" class="h-1 flex-1 rounded-full bg-gray-800 transition-colors"></div>
-                        <div id="str2" class="h-1 flex-1 rounded-full bg-gray-800 transition-colors"></div>
-                        <div id="str3" class="h-1 flex-1 rounded-full bg-gray-800 transition-colors"></div>
+                        <div id="pw1" class="h-1 flex-1 rounded-full bg-gray-700 transition-colors"></div>
+                        <div id="pw2" class="h-1 flex-1 rounded-full bg-gray-700 transition-colors"></div>
+                        <div id="pw3" class="h-1 flex-1 rounded-full bg-gray-700 transition-colors"></div>
                     </div>
-                    <p id="strLabel" class="text-xs mt-1"></p>
-                    @error('password') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    <p id="pwLabel" class="text-xs mt-1"></p>
+                    @error('password') <p class="form-error">{{ $message }}</p> @enderror
                 </div>
                 <div>
-                    <label class="block text-xs text-gray-400 mb-1.5">Konfirmasi password</label>
-                    <input type="password" name="password_confirmation" placeholder="Ulangi password" class="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-xl
-                                  text-sm text-white placeholder-gray-600 focus:outline-none
-                                  focus:border-violet-500 transition-colors">
+                    <label class="form-label">Konfirmasi Password</label>
+                    <input type="password" name="password_confirmation" placeholder="Ulangi password"
+                        class="form-input">
                 </div>
-                <button type="submit"
-                    class="w-full py-2.5 bg-violet-600 hover:bg-violet-700 rounded-xl text-sm font-medium transition-colors mt-1">
-                    Daftar Sekarang
-                </button>
+                <button type="submit" class="btn-submit">Daftar Sekarang</button>
             </form>
             <p class="text-center text-gray-600 text-xs mt-4">
-                Sudah punya akun?
-                <button onclick="switchTab('login')" class="text-violet-400 hover:underline">Masuk di sini</button>
+                Sudah punya akun? <button onclick="switchTab('login')"
+                    class="text-violet-400 hover:underline">Masuk</button>
             </p>
         </div>
     </div>

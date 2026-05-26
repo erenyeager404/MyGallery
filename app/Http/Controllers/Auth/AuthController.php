@@ -6,10 +6,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    // ── Register ────────────────────────────────
     public function register(Request $request)
     {
         $request->validate([
@@ -18,7 +18,6 @@ class AuthController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
-        // Handle email sudah ada tapi belum verifikasi
         $existing = User::where('email', $request->email)->first();
         if ($existing) {
             if ($existing->hasVerifiedEmail()) {
@@ -26,7 +25,6 @@ class AuthController extends Controller
                     ->withErrors(['email' => 'Email sudah terdaftar. Silahkan login.'])
                     ->withInput($request->only('name', 'email'));
             }
-            // Hapus akun lama yang belum diverifikasi
             $existing->delete();
         }
 
@@ -44,7 +42,6 @@ class AuthController extends Controller
             ->with('success', 'Registrasi berhasil! Cek email untuk verifikasi.');
     }
 
-    // ── Login ────────────────────────────────────
     public function login(Request $request)
     {
         $request->validate([
@@ -79,7 +76,6 @@ class AuthController extends Controller
         );
     }
 
-    // ── Logout ───────────────────────────────────
     public function logout(Request $request)
     {
         Auth::logout();
@@ -88,35 +84,34 @@ class AuthController extends Controller
         return redirect()->route('landing');
     }
 
-    // ── Google OAuth ─────────────────────────────
     public function redirectToGoogle()
     {
-        return \Laravel\Socialite\Facades\Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = \Laravel\Socialite\Facades\Socialite::driver('google')->user();
+            $g = Socialite::driver('google')->user();
         } catch (\Exception $e) {
             return redirect()->route('landing')
-                ->withErrors(['email' => 'Login Google gagal, coba lagi.']);
+                ->withErrors(['email' => 'Login Google gagal.']);
         }
 
-        $user = User::where('google_id', $googleUser->getId())
-            ->orWhere('email', $googleUser->getEmail())
+        $user = User::where('google_id', $g->getId())
+            ->orWhere('email', $g->getEmail())
             ->first();
 
         if ($user) {
             $user->update([
-                'google_id' => $googleUser->getId(),
+                'google_id' => $g->getId(),
                 'email_verified_at' => $user->email_verified_at ?? now(),
             ]);
         } else {
             $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'google_id' => $googleUser->getId(),
+                'name' => $g->getName(),
+                'email' => $g->getEmail(),
+                'google_id' => $g->getId(),
                 'password' => null,
                 'email_verified_at' => now(),
             ]);

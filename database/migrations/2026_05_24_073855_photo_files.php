@@ -9,10 +9,8 @@ return new class extends Migration {
         Schema::create('photo_files', function (Blueprint $table) {
             $table->id();
             $table->foreignId('photo_id')->constrained()->cascadeOnDelete();
-            // Jika foto dihapus, file-nya ikut terhapus dari DB
             $table->string('file_path');
             $table->integer('order')->default(0);
-            // urutan tampil di slider
             $table->timestamps();
         });
     }

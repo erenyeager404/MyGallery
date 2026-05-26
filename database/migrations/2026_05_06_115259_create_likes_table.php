@@ -11,7 +11,6 @@ return new class extends Migration {
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('photo_id')->constrained()->cascadeOnDelete();
             $table->unique(['user_id', 'photo_id']);
-            // 1 user hanya bisa like 1 foto sekali
             $table->timestamps();
         });
     }

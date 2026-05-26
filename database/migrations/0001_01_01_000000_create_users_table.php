@@ -11,9 +11,9 @@ return new class extends Migration {
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password')->nullable();
-            // nullable karena user Google tidak punya password
             $table->boolean('is_admin')->default(false);
             $table->string('google_id')->nullable();
+            $table->string('avatar')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamp('last_login_at')->nullable();
             $table->rememberToken();

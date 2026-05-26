@@ -17,6 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'is_admin',
         'google_id',
+        'avatar',
         'last_login_at',
     ];
 
@@ -27,13 +28,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'last_login_at' => 'datetime',
     ];
-    //Tamplate email
+
     public function sendEmailVerificationNotification(): void
     {
         $this->notify(new VerifyEmailNotification());
     }
 
-    // ── Relasi ──────────────────────────────────
+    // Relasi
     public function photos()
     {
         return $this->hasMany(Photo::class);
@@ -54,25 +55,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function followers()
     {
         return $this->hasMany(Follow::class, 'following_id');
-        // siapa yang follow user ini
     }
 
     public function following()
     {
         return $this->hasMany(Follow::class, 'follower_id');
-        // siapa yang di-follow user ini
     }
 
-    // ── Helpers ─────────────────────────────────
+    // Helpers
     public function isFollowing(int $userId): bool
     {
         return $this->following()->where('following_id', $userId)->exists();
     }
 
-    // Avatar: foto profil atau inisial nama
     public function getAvatarUrlAttribute(): string
     {
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name)
-            . '&background=7C3AED&color=fff&size=64';
+        if ($this->avatar) {
+            return asset('storage/' . $this->avatar);
+        }
+        return 'https://ui-avatars.com/api/?name='
+            . urlencode($this->name)
+            . '&background=7C3AED&color=fff&size=128&bold=true';
     }
 }

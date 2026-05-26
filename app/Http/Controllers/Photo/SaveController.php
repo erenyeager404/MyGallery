@@ -11,7 +11,6 @@ class SaveController extends Controller
     {
         $save = Save::where('user_id', auth()->id())
             ->where('photo_id', $photo->id)->first();
-
         if ($save) {
             $save->delete();
             $saved = false;
@@ -19,7 +18,6 @@ class SaveController extends Controller
             Save::create(['user_id' => auth()->id(), 'photo_id' => $photo->id]);
             $saved = true;
         }
-
         return response()->json(['saved' => $saved]);
     }
 
@@ -34,9 +32,7 @@ class SaveController extends Controller
                 'photo.comments',
                 'photo.tags'
             ])
-            ->latest()->get()
-            ->pluck('photo')->filter();
-
+            ->latest()->get()->pluck('photo')->filter();
         return view('saved.index', compact('photos'));
     }
 }

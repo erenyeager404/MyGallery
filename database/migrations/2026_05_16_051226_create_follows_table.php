@@ -9,11 +9,8 @@ return new class extends Migration {
         Schema::create('follows', function (Blueprint $table) {
             $table->id();
             $table->foreignId('follower_id')->constrained('users')->cascadeOnDelete();
-            // yang follow
             $table->foreignId('following_id')->constrained('users')->cascadeOnDelete();
-            // yang di-follow
             $table->unique(['follower_id', 'following_id']);
-            // tidak bisa follow orang yang sama 2x
             $table->timestamps();
         });
     }

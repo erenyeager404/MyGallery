@@ -11,13 +11,11 @@ return new class extends Migration {
             $table->string('name')->unique();
             $table->timestamps();
         });
-
         Schema::create('photo_tag', function (Blueprint $table) {
             $table->id();
             $table->foreignId('photo_id')->constrained()->cascadeOnDelete();
             $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
             $table->unique(['photo_id', 'tag_id']);
-            // 1 foto tidak bisa punya tag yang sama 2x
         });
     }
     public function down(): void

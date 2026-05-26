@@ -10,7 +10,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            ['email' => 'admin@mygallery.com'],
+            ['email' => 'admin@ourmemora.com'],
             [
                 'name' => 'Administrator',
                 'password' => Hash::make('admin123'),
@@ -18,6 +18,6 @@ class AdminSeeder extends Seeder
                 'email_verified_at' => now(),
             ]
         );
-        $this->command->info('Admin seeder berhasil!');
+        $this->command->info('Admin berhasil dibuat!');
     }
 }

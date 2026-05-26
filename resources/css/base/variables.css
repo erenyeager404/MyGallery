@@ -1,17 +1,8 @@
 :root {
-    --color-bg: #0F172A;
-    --color-surface: #1E293B;
-    --color-border: #334155;
-    --color-violet: #7C3AED;
-    --color-violet-l: #A78BFA;
-    --color-violet-d: #4C1D95;
-    --color-red: #C53030;
-    --color-green: #10B981;
-    --color-text: #F8FAFC;
-    --color-muted: #94A3B8;
-    --sidebar-w: 72px;
-    --sidebar-w-open: 240px;
+    --sidebar-w: 68px;
+    --sidebar-w-open: 232px;
     --radius-card: 16px;
     --radius-btn: 10px;
     --radius-input: 10px;
+    --transition: 0.2s ease;
 }

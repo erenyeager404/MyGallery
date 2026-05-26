@@ -17,15 +17,15 @@ class SearchController extends Controller
         if ($query) {
             $photos = Photo::where('status', 'public')
                 ->where(function ($q) use ($query) {
-                    $q->where('caption', 'like', "%{$query}%")
-                        ->orWhere('description', 'like', "%{$query}%")
-                        ->orWhereHas('tags', fn($q) => $q->where('name', 'like', "%{$query}%"))
-                        ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%{$query}%"));
+                    $q->where('caption', 'like', "%$query%")
+                        ->orWhere('description', 'like', "%$query%")
+                        ->orWhereHas('tags', fn($q) => $q->where('name', 'like', "%$query%"))
+                        ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%$query%"));
                 })
                 ->with(['user', 'files', 'likes', 'saves', 'comments', 'tags'])
                 ->latest()->get();
 
-            $tags = Tag::where('name', 'like', "%{$query}%")
+            $tags = Tag::where('name', 'like', "%$query%")
                 ->withCount('photos')
                 ->orderBy('photos_count', 'desc')
                 ->take(10)->get();

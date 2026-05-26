@@ -12,21 +12,15 @@ class FollowController extends Controller
         if ($user->id === auth()->id()) {
             return response()->json(['error' => 'Tidak bisa follow diri sendiri.'], 403);
         }
-
         $follow = Follow::where('follower_id', auth()->id())
             ->where('following_id', $user->id)->first();
-
         if ($follow) {
             $follow->delete();
-            $isFollowing = false;
+            $f = false;
         } else {
             Follow::create(['follower_id' => auth()->id(), 'following_id' => $user->id]);
-            $isFollowing = true;
+            $f = true;
         }
-
-        return response()->json([
-            'is_following' => $isFollowing,
-            'total_followers' => $user->followers()->count(),
-        ]);
+        return response()->json(['is_following' => $f, 'total_followers' => $user->followers()->count()]);
     }
 }
