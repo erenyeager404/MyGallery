@@ -2,9 +2,9 @@
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
-class Save extends Model
+class Comment extends Model
 {
-    protected $fillable = ['user_id', 'photo_id'];
+    protected $fillable = ['user_id', 'photo_id', 'body'];
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
             'email' => 'admingallery@gmail.com',
             'password' => Hash::make('admin123'),
             'is_admin' => true,
+            'email_verified_at' => now(),
         ]);
 
         User::create([
@@ -23,6 +24,7 @@ class UserSeeder extends Seeder
             'email' => 'eren@gmail.com',
             'password' => Hash::make('eren123'),
             'is_admin' => false,
+            'email_verified_at' => now(),
         ]);
     }
 }

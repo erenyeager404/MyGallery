@@ -1,7 +1,7 @@
 <?php
+namespace App\Http\Controllers\User;
 
-namespace App\Http\Controllers;
-
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -10,12 +10,11 @@ class ProfileController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $photos = $user->photos()
+            ->with(['files', 'likes', 'comments', 'tags'])
+            ->latest()->get();
 
-        $photos = $user->photos()->latest()->get();
-        // ↑ Ambil SEMUA foto milik user (public + private)
-        // Karena ini halaman profile sendiri, private pun boleh tampil
-
-        return view('profile', compact('user', 'photos'));
+        return view('profile.index', compact('user', 'photos'));
     }
 
     public function changePassword(Request $request)
@@ -27,14 +26,9 @@ class ProfileController extends Controller
 
         if (!Hash::check($request->current_password, auth()->user()->password)) {
             return back()->withErrors(['current_password' => 'Password lama tidak cocok.']);
-            // ↑ Hash::check() membandingkan plain text dengan hash di database
-            // Jika tidak cocok, kembalikan ke form dengan pesan error
         }
 
-        auth()->user()->update([
-            'password' => Hash::make($request->password),
-            // ↑ Enkripsi password baru sebelum disimpan
-        ]);
+        auth()->user()->update(['password' => Hash::make($request->password)]);
 
         return back()->with('success', 'Password berhasil diubah!');
     }

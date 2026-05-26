@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -10,10 +9,8 @@ class DashboardController extends Controller
     public function index()
     {
         $photos = Photo::where('status', 'public')
-            ->with(['user', 'likes', 'saves', 'comments'])
-            ->latest()
-            ->get();
-        // ↑ Sama seperti dashboard user, tapi di view admin ada tombol hapus
+            ->with(['user', 'files', 'likes', 'saves', 'comments'])
+            ->latest()->paginate(20);
 
         return view('admin.dashboard', compact('photos'));
     }
