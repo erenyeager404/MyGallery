@@ -105,14 +105,14 @@ class Event extends Model
     // Leaderboard: foto peserta diranking berdasarkan like
     public function getLeaderboard(int $limit = 20)
     {
-        return Photo::whereIn(
-            'id',
-            $this->participations()->pluck('photo_id')
-        )
+        return Photo::query()
+            ->whereHas('eventParticipation', function ($q) {
+                $q->where('event_id', $this->id);
+            })
             ->withCount('likes')
             ->with(['files', 'user'])
-            ->orderBy('likes_count', 'desc')
-            ->take($limit)
+            ->orderByDesc('likes_count')
+            ->limit($limit)
             ->get();
     }
 

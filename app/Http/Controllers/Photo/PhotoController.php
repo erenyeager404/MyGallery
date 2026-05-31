@@ -92,22 +92,25 @@ class PhotoController extends Controller
             'event_id' => 'nullable|exists:events,id',
         ]);
 
-        // Validasi event
         $event = null;
-        if ($request->event_id) {
+        if ($request->filled('event_id')) {
             $event = Event::find($request->event_id);
-            if (!$event || !$event->canSubmit()) {
-                return back()->withErrors(['event_id' => 'Event tidak tersedia.']);
+
+            // Jika event tidak ditemukan atau sudah berakhir, skip saja — jangan block upload
+            if (!$event || $event->status === 'ended') {
+                $event = null;
             }
-            if ($event->hasUserJoined(auth()->id())) {
-                return back()->withErrors(['event_id' => 'Kamu sudah ikut event ini.']);
+
+            // Jika user sudah ikut event ini, skip event tapi tetap upload foto
+            if ($event && $event->hasUserJoined(auth()->id())) {
+                $event = null;
+                session()->flash('warning', 'Kamu sudah ikut event ini. Foto tetap diupload tanpa event.');
             }
         }
 
         $files = $request->file('photos');
         $albumId = count($files) > 1 ? Str::uuid()->toString() : null;
 
-        // Gabungkan tags + auto_tag event
         $tagInput = $request->tags ?? '';
         if ($event?->auto_tag) {
             $tagInput = trim($tagInput . ',' . $event->auto_tag . ',EventMemora', ',');
@@ -121,32 +124,37 @@ class PhotoController extends Controller
             'status' => $request->status,
         ]);
 
+        $manager = new ImageManager(new Driver());
+
         foreach ($files as $i => $file) {
             $uuid = Str::uuid()->toString();
-            $manager = new ImageManager(new Driver());
 
-            // Simpan versi original (max 1920px)
-            $origImg = $manager->read($file->getPathname())
-                ->scaleDown(width: 1920, height: 1920)
-                ->toWebp(88);
-            $origPath = "photos/orig/{$uuid}.webp";
-            Storage::disk('public')->put($origPath, $origImg);
+            try {
+                $origImg = $manager->read($file->getPathname())
+                    ->scaleDown(width: 1920, height: 1920)
+                    ->toWebp(88);
+                $origPath = "photos/orig/{$uuid}.webp";
+                Storage::disk('public')->put($origPath, $origImg);
 
-            // Simpan versi thumbnail (max 800px, untuk dashboard)
-            $thumbImg = $manager->read($file->getPathname())
-                ->scaleDown(width: 800, height: 800)
-                ->toWebp(72);
-            $thumbPath = "photos/thumb/{$uuid}.webp";
-            Storage::disk('public')->put($thumbPath, $thumbImg);
+                $thumbImg = $manager->read($file->getPathname())
+                    ->scaleDown(width: 800, height: 800)
+                    ->toWebp(72);
+                $thumbPath = "photos/thumb/{$uuid}.webp";
+                Storage::disk('public')->put($thumbPath, $thumbImg);
+            } catch (\Exception $e) {
+                // Fallback: simpan file asli tanpa kompresi
+                $origPath = $file->store('photos/orig', 'public');
+                $thumbPath = null;
+            }
 
             PhotoFile::create([
                 'photo_id' => $photo->id,
                 'file_path' => $origPath,
-                'thumb_path' => $thumbPath,
+                'thumb_path' => $thumbPath ?? $origPath,
                 'order' => $i,
             ]);
         }
-        // Tags
+
         if ($tagInput) {
             $tagIds = collect(
                 array_unique(array_filter(array_map('trim', explode(',', strtolower($tagInput)))))
@@ -154,16 +162,21 @@ class PhotoController extends Controller
             $photo->tags()->sync($tagIds);
         }
 
-        // Daftarkan ke event
         if ($event) {
-            EventParticipation::create([
-                'event_id' => $event->id,
-                'photo_id' => $photo->id,
-                'user_id' => auth()->id(),
-            ]);
+            try {
+                EventParticipation::create([
+                    'event_id' => $event->id,
+                    'photo_id' => $photo->id,
+                    'user_id' => auth()->id(),
+                ]);
+            } catch (\Exception $e) {
+
+            }
         }
 
-        return redirect()->route('dashboard')
+        $redirectRoute = auth()->user()->is_admin ? 'admin.dashboard' : 'dashboard';
+
+        return redirect()->route($redirectRoute)
             ->with('success', 'Foto berhasil diupload!');
     }
 

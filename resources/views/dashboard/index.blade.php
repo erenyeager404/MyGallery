@@ -4,15 +4,16 @@
 @push('head')
     <style>
         .photo-card {
+            position: relative;
             background: rgba(255, 255, 255, .055);
             border: 1px solid rgba(255, 255, 255, .09);
             border-radius: 1.25rem;
             overflow: hidden;
-            transition: background .15s
+            transition: background .15s;
         }
 
         .photo-card:hover {
-            background: rgba(255, 255, 255, .08)
+            background: rgba(255, 255, 255, .08);
         }
 
         .action-pill {
@@ -25,23 +26,23 @@
             border: 1px solid rgba(255, 255, 255, .09);
             background: rgba(255, 255, 255, .055);
             transition: all .15s;
-            cursor: pointer
+            cursor: pointer;
         }
 
         .action-pill:hover {
-            background: rgba(255, 255, 255, .1)
+            background: rgba(255, 255, 255, .1);
         }
 
         .action-pill.liked {
             background: rgba(239, 68, 68, .15);
             border-color: rgba(239, 68, 68, .35);
-            color: #f87171
+            color: #f87171;
         }
 
         .action-pill.saved {
             background: rgba(124, 58, 237, .15);
             border-color: rgba(124, 58, 237, .35);
-            color: #c4b5fd
+            color: #c4b5fd;
         }
     </style>
 @endpush
@@ -50,7 +51,7 @@
     <div>
         <div class="flex items-center justify-between mb-7">
             <div>
-                <h2 class="text-2xl font-bold">Semua Kenangan</h2>
+                <h2 class="text-2xl font-bold">Semua Foto</h2>
                 <p class="text-gray-500 text-sm mt-0.5">Foto-foto terbaru dari komunitas</p>
             </div>
             <a href="{{ route('upload') }}"
@@ -72,8 +73,7 @@
                 <p class="text-xl text-gray-400">Belum ada kenangan</p>
             </div>
         @else
-
-            {{-- Skeleton loading (hilang setelah konten siap) --}}
+            <!-- Skeleton -->
             <div id="skGrid" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                 @for($i = 0; $i < 8; $i++)
                     <div class="break-inside-avoid rounded-2xl overflow-hidden" style="border:1px solid rgba(255,255,255,.07)">
@@ -87,27 +87,48 @@
                 @endfor
             </div>
 
-            {{-- Real grid --}}
+            <!-- Real Grid -->
             <div id="realGrid" class="hidden columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
                 @foreach($photos as $photo)
                     @if($photo->files->isNotEmpty())
                         @php
-                            // Event rank badge
+                            // Cek kemenangan event (selesai)
+                            $win = $photo->eventParticipation ? $photo->getFinishedEventWinAttribute() : null;
+                            // Jika tidak menang, cek peringkat event aktif
                             $eventRank = null;
-                            $ep = $photo->eventParticipation;
-                            if ($ep && $ep->event && in_array($ep->event->status, ['active', 'voting', 'ended'])) {
-                                $lb = $ep->event->getLeaderboard();
-                                $pos = $lb->search(fn($p) => $p->id === $photo->id);
-                                if ($pos !== false && $pos < $ep->event->max_winners) {
-                                    $eventRank = $pos + 1;
+                            if (!$win) {
+                                $ep = $photo->eventParticipation;
+                                if ($ep && $ep->event && in_array($ep->event->status, ['active', 'voting'])) {
+                                    $lb = $ep->event->getLeaderboard();
+                                    $pos = $lb->search(fn($p) => $p->id === $photo->id);
+                                    if ($pos !== false && $pos < $ep->event->max_winners) {
+                                        $eventRank = $pos + 1;
+                                    }
                                 }
                             }
+                            // Nama event untuk badge kemenangan
+                            $eventName = $win ? ($win['event_name'] ?? $photo->eventParticipation?->event?->name ?? 'Event') : null;
+                            $tagEventName = $eventName ? '#Pemenang' . str_replace(' ', '', $eventName) : '';
                         @endphp
 
                         <div class="photo-card break-inside-avoid cursor-pointer"
                             onclick="window.location.href='{{ route('photos.show', $photo) }}'">
+                            @if($win)
+                                <div class="absolute top-2 left-2 z-10">
+                                    <div class="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                                        style="background:rgba(234,179,8,.92);color:#000;box-shadow:0 0 10px rgba(234,179,8,.5)">
+                                        @if($win['rank'] === 1) 👑
+                                        @elseif($win['rank'] === 2) 🥈
+                                        @else 🥉
+                                        @endif
+                                        #{{ $win['rank'] }}
+                                        @if($tagEventName)
+                                            <span class="opacity-90">{{ $tagEventName }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
 
-                            {{-- Foto / Slider --}}
                             <div class="relative overflow-hidden">
                                 @if($photo->files->count() > 1)
                                     <div class="flex transition-transform duration-300" id="st-{{ $photo->id }}"
@@ -149,7 +170,6 @@
                                         style="max-height:360px">
                                 @endif
 
-                                {{-- Event rank badge --}}
                                 @if($eventRank)
                                     <div class="absolute top-2 left-2 z-10">
                                         <span class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-bold"
@@ -183,17 +203,12 @@
                                         @foreach($photo->tags->take(3) as $tag)
                                             <a href="{{ route('search') }}?q={{ $tag->name }}" onclick="event.stopPropagation()"
                                                 class="px-2 py-0.5 text-[11px] rounded-full text-gray-500 hover:text-violet-400 transition-colors"
-                                                style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)">
-                                                #{{ $tag->name }}
-                                            </a>
+                                                style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)">#{{ $tag->name }}</a>
                                         @endforeach
                                     </div>
                                 @endif
 
-                                {{-- Actions --}}
                                 <div class="flex items-center gap-1.5 pt-3" style="border-top:1px solid rgba(255,255,255,.07)">
-
-                                    {{-- Like --}}
                                     <button onclick="event.stopPropagation(); doLike({{ $photo->id }},this)"
                                         class="action-pill {{ $photo->isLikedBy(auth()->id()) ? 'liked' : '' }}">
                                         <svg class="w-3.5 h-3.5" fill="{{ $photo->isLikedBy(auth()->id()) ? 'currentColor' : 'none' }}"
@@ -203,8 +218,6 @@
                                         </svg>
                                         <span class="lc">{{ $photo->likes->count() }}</span>
                                     </button>
-
-                                    {{-- Save --}}
                                     <button onclick="event.stopPropagation(); doSave({{ $photo->id }},this)"
                                         class="action-pill {{ $photo->isSavedBy(auth()->id()) ? 'saved' : '' }}">
                                         <svg class="w-3.5 h-3.5" fill="{{ $photo->isSavedBy(auth()->id()) ? 'currentColor' : 'none' }}"
@@ -213,8 +226,6 @@
                                                 d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                         </svg>
                                     </button>
-
-                                    {{-- Comment --}}
                                     <button
                                         onclick="event.stopPropagation(); window.location.href='{{ route('photos.show', $photo) }}#comments'"
                                         class="action-pill">
@@ -224,8 +235,6 @@
                                         </svg>
                                         {{ $photo->comments->count() }}
                                     </button>
-
-                                    {{-- Download --}}
                                     <a href="{{ route('photos.download', $photo) }}" onclick="event.stopPropagation()"
                                         class="action-pill ml-auto hover:!text-green-400 hover:!border-green-400/30 hover:!bg-green-400/10">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,8 +242,6 @@
                                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                         </svg>
                                     </a>
-
-                                    {{-- Views --}}
                                     <span class="flex items-center gap-1 text-[11px] text-gray-600">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
@@ -242,8 +249,6 @@
                                         </svg>
                                         {{ number_format($photo->views) }}
                                     </span>
-
-                                    {{-- More --}}
                                     <div class="relative">
                                         <button onclick="event.stopPropagation(); toggleDD(this)"
                                             class="action-pill w-7 h-7 !p-0 flex items-center justify-center">
@@ -291,7 +296,6 @@
         @endif
     </div>
 
-    {{-- Toast --}}
     <div id="toast"
         class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-xl text-sm text-white shadow-xl hidden"
         style="background:#0f111a;border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px)">
@@ -304,7 +308,6 @@
         const csrf = document.querySelector('meta[name="csrf-token"]').content;
         const SC = {};
 
-        // Skeleton → real grid
         function showRealGrid() {
             document.getElementById('skGrid')?.classList.add('hidden');
             document.getElementById('realGrid')?.classList.remove('hidden');
@@ -313,7 +316,6 @@
         window.addEventListener('load', showRealGrid);
         setTimeout(showRealGrid, 1200);
 
-        // Lazy load
         const lazyImgs = document.querySelectorAll('img.lazy');
         const obs = new IntersectionObserver(entries => {
             entries.forEach(e => {
@@ -327,7 +329,6 @@
         }, { rootMargin: '250px' });
         lazyImgs.forEach(img => obs.observe(img));
 
-        // Slider
         function slideC(id, dir) {
             const t = document.getElementById(`st-${id}`);
             const dots = document.querySelectorAll(`[id^="sd-${id}-"]`);
@@ -335,13 +336,10 @@
             SC[id] = ((SC[id] || 0) + dir + n) % n;
             t.style.transform = `translateX(-${SC[id] * (100 / n)}%)`;
             dots.forEach((d, i) => {
-                d.className = i === SC[id]
-                    ? 'rounded-full bg-white w-3 h-1.5 transition-all duration-200'
-                    : 'rounded-full bg-white/40 w-1.5 h-1.5 transition-all duration-200';
+                d.className = i === SC[id] ? 'rounded-full bg-white w-3 h-1.5 transition-all duration-200' : 'rounded-full bg-white/40 w-1.5 h-1.5 transition-all duration-200';
             });
         }
 
-        // Like
         async function doLike(id, btn) {
             const r = await fetch(`/photos/${id}/like`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' } });
             const d = await r.json();
@@ -351,7 +349,6 @@
             btn.classList.toggle('liked', d.liked);
         }
 
-        // Save
         async function doSave(id, btn) {
             const r = await fetch(`/photos/${id}/save`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Content-Type': 'application/json' } });
             const d = await r.json();
@@ -360,7 +357,6 @@
             btn.classList.toggle('saved', d.saved);
         }
 
-        // Dropdown
         function toggleDD(btn) {
             const m = btn.nextElementSibling;
             document.querySelectorAll('.hidden.absolute').forEach(x => { if (x !== m) x.classList.add('hidden'); });
@@ -374,7 +370,6 @@
             setTimeout(() => document.addEventListener('click', close), 0);
         }
 
-        // Copy link
         function copyLink(url) {
             navigator.clipboard.writeText(url).then(() => {
                 const t = document.getElementById('toast');

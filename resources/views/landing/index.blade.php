@@ -35,11 +35,7 @@
     </section>
 
     <section class="max-w-7xl mx-auto px-6 pb-24">
-        @guest
-            <p class="text-center text-xs text-gray-600 mb-8">
-                Download gratis tanpa login &nbsp;·&nbsp; Like, Simpan &amp; Komentar butuh akun
-            </p>
-        @endguest
+
 
         <div class="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
             @forelse($photos as $photo)

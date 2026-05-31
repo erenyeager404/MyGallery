@@ -103,4 +103,28 @@ class Photo extends Model
     {
         return $this->hasOne(EventParticipation::class);
     }
+
+    // Photo pemenang 
+    public function getFinishedEventWinAttribute(): ?array
+    {
+        $p = $this->eventParticipation;
+        if (!$p)
+            return null;
+
+        $event = $p->event;
+        if (!$event || $event->status !== 'ended')
+            return null;
+
+        $lb = $event->getLeaderboard();
+        $pos = $lb->search(fn($photo) => $photo->id === $this->id);
+
+        if ($pos === false || $pos >= $event->max_winners)
+            return null;
+
+        return [
+            'rank' => $pos + 1,
+            'event' => $event->title,
+            'auto_tag' => $event->auto_tag,
+        ];
+    }
 }

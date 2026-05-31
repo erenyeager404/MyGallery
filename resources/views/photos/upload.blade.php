@@ -1,9 +1,8 @@
-@extends('layouts.app')
+@extends(auth()->user()->is_admin ? 'layouts.admin' : 'layouts.app')
 @section('title', 'Upload')
 
 @push('head')
     <style>
-        /* Step indicator */
         .step-dot {
             width: 28px;
             height: 28px;
@@ -14,47 +13,40 @@
             font-size: 12px;
             font-weight: 600;
             transition: all .2s;
-            flex-shrink: 0
-        }
-
-        .step-dot.done {
-            background: rgba(124, 58, 237, .4);
-            border: 1px solid rgba(124, 58, 237, .6);
-            color: #c4b5fd
+            flex-shrink: 0;
         }
 
         .step-dot.active {
             background: rgba(124, 58, 237, .6);
             border: 1px solid rgba(124, 58, 237, .8);
-            color: #fff
+            color: #fff;
+        }
+
+        .step-dot.done {
+            background: rgba(124, 58, 237, .3);
+            border: 1px solid rgba(124, 58, 237, .5);
+            color: #c4b5fd;
         }
 
         .step-dot.idle {
             background: rgba(255, 255, 255, .06);
             border: 1px solid rgba(255, 255, 255, .1);
-            color: #6b7280
-        }
-
-        /* Editor controls — lebih manusiawi */
-        .ctrl-section {
-            margin-bottom: 20px
+            color: #6b7280;
         }
 
         .ctrl-label {
+            display: block;
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: .06em;
             color: #6b7280;
             margin-bottom: 10px;
-            display: block
         }
 
-        .ratio-btn,
-        .rotate-btn {
+        .ratio-btn {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
             padding: 7px 14px;
             border-radius: 10px;
             font-size: 12px;
@@ -63,85 +55,81 @@
             border: 1px solid rgba(255, 255, 255, .1);
             background: rgba(255, 255, 255, .05);
             color: #9ca3af;
-            user-select: none
+            user-select: none;
         }
 
-        .ratio-btn:hover,
-        .rotate-btn:hover {
+        .ratio-btn:hover {
             background: rgba(255, 255, 255, .1);
-            color: #e5e7eb
+            color: #e5e7eb;
         }
 
-        .ratio-btn.active,
-        .rotate-btn.active {
+        .ratio-btn.active {
             background: rgba(124, 58, 237, .25);
             border-color: rgba(124, 58, 237, .5);
-            color: #c4b5fd
+            color: #c4b5fd;
         }
 
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px
+            gap: 8px;
         }
 
-        .filter-thumb {
+        .filter-item {
             border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
-            position: relative;
             border: 2px solid transparent;
-            transition: all .15s
+            transition: all .15s;
         }
 
-        .filter-thumb:hover {
-            border-color: rgba(255, 255, 255, .2)
+        .filter-item:hover {
+            border-color: rgba(255, 255, 255, .2);
         }
 
-        .filter-thumb.active {
-            border-color: rgba(124, 58, 237, .7)
+        .filter-item.active {
+            border-color: rgba(124, 58, 237, .7);
         }
 
-        .filter-thumb img {
+        .filter-item img {
             width: 100%;
-            height: 56px;
+            height: 52px;
             object-fit: cover;
-            pointer-events: none
+            pointer-events: none;
+            display: block;
         }
 
-        .filter-thumb span {
+        .filter-item span {
             display: block;
             text-align: center;
             font-size: 10px;
             color: #9ca3af;
             padding: 3px 0;
-            background: rgba(0, 0, 0, .4)
+            background: rgba(0, 0, 0, .4);
         }
 
         .adj-row {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            margin-bottom: 14px
+            margin-bottom: 14px;
         }
 
         .adj-head {
             display: flex;
             justify-content: space-between;
-            align-items: center
+            align-items: center;
+            margin-bottom: 5px;
         }
 
         .adj-head span {
             font-size: 12px;
-            color: #9ca3af
+            color: #9ca3af;
         }
 
         .adj-head small {
             font-size: 11px;
             color: #6b7280;
-            font-variant-numeric: tabular-nums;
             min-width: 28px;
-            text-align: right
+            text-align: right;
+            font-variant-numeric: tabular-nums;
         }
 
         input[type=range] {
@@ -149,20 +137,30 @@
             height: 4px;
             border-radius: 4px;
             appearance: none;
+            -webkit-appearance: none;
             background: rgba(255, 255, 255, .1);
             accent-color: #7c3aed;
-            cursor: pointer
+            cursor: pointer;
         }
 
         input[type=range]::-webkit-slider-thumb {
-            appearance: none;
+            -webkit-appearance: none;
             width: 16px;
             height: 16px;
             border-radius: 50%;
             background: #7c3aed;
             border: 2px solid #a78bfa;
             cursor: pointer;
-            box-shadow: 0 0 6px rgba(124, 58, 237, .5)
+            box-shadow: 0 0 6px rgba(124, 58, 237, .5);
+        }
+
+        select option {
+            background: #0f111a;
+            color: #f1f5f9;
+        }
+
+        select {
+            color-scheme: dark;
         }
     </style>
 @endpush
@@ -173,26 +171,25 @@
         {{-- Step indicator --}}
         <div class="flex items-center gap-3 mb-8">
             <div id="si1" class="step-dot active">1</div>
-            <p class="text-sm font-medium" id="sl1">Pilih Foto</p>
+            <span id="sl1" class="text-sm font-medium text-white">Pilih Foto</span>
             <div class="flex-1 h-px" style="background:rgba(255,255,255,.08)"></div>
             <div id="si2" class="step-dot idle">2</div>
-            <p class="text-sm text-gray-600" id="sl2">Edit Foto</p>
+            <span id="sl2" class="text-sm text-gray-600">Edit Foto</span>
             <div class="flex-1 h-px" style="background:rgba(255,255,255,.08)"></div>
             <div id="si3" class="step-dot idle">3</div>
-            <p class="text-sm text-gray-600" id="sl3">Detail</p>
+            <span id="sl3" class="text-sm text-gray-600">Detail</span>
         </div>
 
-        {{-- ══ STEP 1 ══ --}}
+        {{-- ══ STEP 1 — Pilih Foto ══ --}}
         <div id="step1">
             <h2 class="text-xl font-bold mb-5">Pilih Foto</h2>
 
             <div id="dz"
                 class="w-full min-h-56 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all"
                 style="border:2px dashed rgba(255,255,255,.12);background:rgba(255,255,255,.02)"
-                onclick="document.getElementById('pi').click()" ondragover="event.preventDefault();dzActive(true)"
+                onclick="document.getElementById('pi').click()" ondragover="event.preventDefault(); dzActive(true)"
                 ondragleave="dzActive(false)" ondrop="onDrop(event)">
-
-                <svg class="w-12 h-12 text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-12 h-12 mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -211,13 +208,13 @@
             </div>
         </div>
 
-        {{-- ══ STEP 2 ══ --}}
+        {{-- ══ STEP 2 — Editor ══ --}}
         <div id="step2" class="hidden">
             <div class="flex items-center justify-between mb-5">
                 <h2 class="text-xl font-bold">Edit Foto</h2>
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-gray-500">
-                        <span id="eIdx">1</span> / <span id="eTot">1</span>
+                        Foto <span id="eIdx">1</span> / <span id="eTot">1</span>
                     </span>
                     <button onclick="prevPhoto()"
                         class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-all"
@@ -241,19 +238,18 @@
                 {{-- Canvas preview --}}
                 <div>
                     <div class="rounded-2xl overflow-hidden flex items-center justify-center"
-                        style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);min-height:280px">
-                        <canvas id="edCanvas" class="max-w-full max-h-72 object-contain rounded-xl"></canvas>
+                        style="background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);min-height:260px">
+                        <canvas id="edCanvas" class="max-w-full max-h-72 rounded-xl"></canvas>
                     </div>
-                    {{-- Thumbnail strip --}}
                     <div id="eThumbs" class="flex gap-2 mt-3 overflow-x-auto pb-1"></div>
                 </div>
 
                 {{-- Controls --}}
-                <div class="rounded-2xl p-5 space-y-0"
+                <div class="rounded-2xl p-5"
                     style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)">
 
                     {{-- Crop --}}
-                    <div class="ctrl-section">
+                    <div class="mb-5">
                         <span class="ctrl-label">Crop</span>
                         <div class="flex gap-2 flex-wrap">
                             <button onclick="setCrop('orig',this)" class="ratio-btn active"
@@ -265,38 +261,39 @@
                     </div>
 
                     {{-- Rotate --}}
-                    <div class="ctrl-section">
+                    <div class="mb-5">
                         <span class="ctrl-label">Putar</span>
-                        <div class="flex gap-2">
-                            <button onclick="doRotate(90)" class="rotate-btn">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="doRotate(90)" class="ratio-btn">
+                                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                                 90°
                             </button>
-                            <button onclick="doRotate(180)" class="rotate-btn">180°</button>
-                            <button onclick="doRotate(270)" class="rotate-btn">270°</button>
-                            <button onclick="resetRotate()" class="rotate-btn"
-                                style="color:#ef4444;border-color:rgba(239,68,68,.3)">Reset</button>
+                            <button onclick="doRotate(180)" class="ratio-btn">180°</button>
+                            <button onclick="doRotate(270)" class="ratio-btn">270°</button>
+                            <button onclick="doRotate(0, true)" class="ratio-btn"
+                                style="color:#ef4444;border-color:rgba(239,68,68,.3)">
+                                Reset
+                            </button>
                         </div>
                     </div>
 
                     {{-- Filter --}}
-                    <div class="ctrl-section">
+                    <div class="mb-5">
                         <span class="ctrl-label">Filter</span>
                         <div class="filter-grid" id="filterGrid"></div>
                     </div>
 
                     {{-- Adjustment --}}
-                    <div class="ctrl-section">
+                    <div class="mb-5">
                         <span class="ctrl-label">Penyesuaian</span>
                         <div id="adjControls"></div>
                     </div>
 
-                    {{-- Apply --}}
                     <button onclick="applyEdit()" id="applyBtn"
-                        class="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all mt-2"
+                        class="w-full py-2.5 rounded-xl text-sm font-medium text-white transition-all"
                         style="background:rgba(124,58,237,.35);border:1px solid rgba(124,58,237,.45)">
                         Terapkan ke Foto Ini
                     </button>
@@ -315,9 +312,16 @@
             </div>
         </div>
 
-        {{-- ══ STEP 3 ══ --}}
+        {{-- ══ STEP 3 — Detail ══ --}}
         <div id="step3" class="hidden">
             <h2 class="text-xl font-bold mb-5">Detail Foto</h2>
+
+            @if(session('warning'))
+                <div class="mb-4 p-4 rounded-xl text-sm text-yellow-300"
+                    style="background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.25)">
+                    ⚠ {{ session('warning') }}
+                </div>
+            @endif
 
             <form id="uForm" method="POST" action="{{ route('upload') }}" enctype="multipart/form-data"
                 class="rounded-2xl p-6 space-y-5"
@@ -325,17 +329,20 @@
                 @csrf
                 <div id="fileSlot"></div>
 
+                {{-- Caption --}}
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">Caption
-                        *</label>
+                    <label class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
+                        Caption *
+                    </label>
                     <input type="text" name="caption" value="{{ old('caption') }}" placeholder="Tulis caption singkat..."
                         class="w-full px-4 py-3 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none transition-all"
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                     @error('caption') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
 
+                {{-- Deskripsi --}}
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
+                    <label class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
                         Deskripsi <span class="normal-case font-normal text-gray-600">(opsional)</span>
                     </label>
                     <textarea name="description" rows="3" placeholder="Ceritakan momen ini..."
@@ -343,8 +350,9 @@
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">{{ old('description') }}</textarea>
                 </div>
 
+                {{-- Tags --}}
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
+                    <label class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
                         Tags <span class="normal-case font-normal text-gray-600">(pisah koma)</span>
                     </label>
                     <input type="text" name="tags" value="{{ old('tags') }}" placeholder="alam, pantai, sunset"
@@ -352,29 +360,34 @@
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                 </div>
 
+                {{-- Event (jika ada) --}}
                 @if($activeEvents->isNotEmpty())
                     <div>
-                        <label class="block text-xs text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
+                        <label class="block text-[11px] text-gray-500 mb-1.5 font-semibold uppercase tracking-wide">
                             Ikuti Event <span class="normal-case font-normal text-gray-600">(opsional)</span>
                         </label>
                         <select name="event_id"
                             class="w-full px-4 py-3 rounded-xl text-sm text-white focus:outline-none transition-all"
-                            style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
-                            <option value="">— Tidak ikut event —</option>
+                            style="background:#0f111a;border:1px solid rgba(255,255,255,.12);color:#e2e8f0">
+                            <option value="" style="background:#0f111a">— Tidak ikut event —</option>
                             @foreach($activeEvents as $ev)
-                                <option value="{{ $ev->id }}" {{ old('event_id') == $ev->id ? 'selected' : '' }}>
+                                <option value="{{ $ev->id }}" style="background:#0f111a" {{ old('event_id') == $ev->id ? 'selected' : '' }}>
                                     {{ $ev->title }}
-                                    ({{ $ev->daysRemaining() > 0 ? $ev->daysRemaining() . ' hari lagi' : 'Berakhir hari ini' }})
+                                    ({{ $ev->daysRemaining() > 0 ? $ev->daysRemaining() . ' hari lagi' : 'Hari terakhir' }})
                                 </option>
                             @endforeach
                         </select>
-                        <p class="text-[11px] text-gray-600 mt-1">Tag event akan otomatis ditambahkan</p>
+                        <p class="text-[11px] text-gray-600 mt-1">
+                            Tag event akan otomatis ditambahkan ke fotomu
+                        </p>
                     </div>
                 @endif
 
+                {{-- Visibilitas --}}
                 <div>
-                    <label
-                        class="block text-xs text-gray-500 mb-3 font-semibold uppercase tracking-wide">Visibilitas</label>
+                    <label class="block text-[11px] text-gray-500 mb-3 font-semibold uppercase tracking-wide">
+                        Visibilitas
+                    </label>
                     <div class="flex gap-3">
                         <label id="vPub"
                             class="flex items-start gap-3 cursor-pointer p-4 flex-1 rounded-xl border transition-all"
@@ -419,7 +432,7 @@
                         style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)">
                         ← Kembali
                     </button>
-                    <button type="submit"
+                    <button type="submit" id="submitBtn"
                         class="flex-1 py-3 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 transition-all"
                         style="background:rgba(124,58,237,.45);border:1px solid rgba(124,58,237,.6)">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -436,9 +449,9 @@
 
 @push('scripts')
     <script>
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
         // STATE
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
         let FILES = [];
         let STATES = [];
         let EDITED = [];
@@ -470,14 +483,14 @@
         }
         function S() { return STATES[curIdx]; }
 
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
         // STEP NAVIGATION
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
         function goStep(n) {
             [1, 2, 3].forEach(i => {
-                document.getElementById(`step${i}`).classList.toggle('hidden', i !== n);
-                const dot = document.getElementById(`si${i}`);
-                const lbl = document.getElementById(`sl${i}`);
+                document.getElementById('step' + i).classList.toggle('hidden', i !== n);
+                const dot = document.getElementById('si' + i);
+                const lbl = document.getElementById('sl' + i);
                 if (i < n) { dot.className = 'step-dot done'; lbl.className = 'text-sm font-medium text-violet-400'; }
                 if (i === n) { dot.className = 'step-dot active'; lbl.className = 'text-sm font-medium text-white'; }
                 if (i > n) { dot.className = 'step-dot idle'; lbl.className = 'text-sm text-gray-600'; }
@@ -486,15 +499,18 @@
             if (n === 3) buildFileSlot();
         }
 
-        // ═══════════════════════════════════════════
-        // STEP 1 — File selection
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
+        // STEP 1 — File Selection
+        // ═══════════════════════════════════
         function dzActive(on) {
             const dz = document.getElementById('dz');
             dz.style.borderColor = on ? 'rgba(124,58,237,.6)' : 'rgba(255,255,255,.12)';
             dz.style.background = on ? 'rgba(124,58,237,.05)' : 'rgba(255,255,255,.02)';
         }
-
+        function onDrop(e) {
+            e.preventDefault(); dzActive(false);
+            onFilesSelected(e.dataTransfer.files);
+        }
         function onFilesSelected(incoming) {
             Array.from(incoming).forEach(f => {
                 if (FILES.length < 10) {
@@ -505,15 +521,13 @@
             });
             renderPreviews();
         }
-
-        function onDrop(e) {
-            e.preventDefault(); dzActive(false);
-            onFilesSelected(e.dataTransfer.files);
-        }
-
         function renderPreviews() {
             const pg = document.getElementById('pg');
-            if (!FILES.length) { pg.classList.add('hidden'); document.getElementById('s1Next').classList.add('hidden'); return; }
+            if (!FILES.length) {
+                pg.classList.add('hidden');
+                document.getElementById('s1Next').classList.add('hidden');
+                return;
+            }
             pg.classList.remove('hidden');
             document.getElementById('s1Next').classList.remove('hidden');
             pg.innerHTML = '';
@@ -524,16 +538,15 @@
                 d.onclick = () => { curIdx = i; goStep(2); };
                 d.innerHTML = `
                 <img src="${url}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                ${i === 0 ? `<div class="absolute bottom-0 left-0 right-0 text-center text-[11px] py-1 text-white font-medium" style="background:rgba(124,58,237,.8)">Utama</div>` : ''}
-                <button type="button" onclick="event.stopPropagation();removeFile(${i})"
+                ${i === 0 ? '<div class="absolute bottom-0 left-0 right-0 text-center text-[11px] py-1 text-white font-medium" style="background:rgba(124,58,237,.8)">Utama</div>' : ''}
+                ${EDITED[i] ? '<div class="absolute top-1.5 left-1.5 w-5 h-5 rounded-full flex items-center justify-center" style="background:rgba(124,58,237,.8)"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>' : ''}
+                <button type="button" onclick="event.stopPropagation(); removeFile(${i})"
                         class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity"
                         style="background:rgba(0,0,0,.65)">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
-                </button>
-                ${EDITED[i] ? `<div class="absolute top-1.5 left-1.5 w-5 h-5 rounded-full flex items-center justify-center" style="background:rgba(124,58,237,.8)"><svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg></div>` : ''}
-            `;
+                </button>`;
                 pg.appendChild(d);
             });
             if (FILES.length < 10) {
@@ -545,67 +558,53 @@
                 pg.appendChild(a);
             }
         }
-
         function removeFile(i) {
             FILES.splice(i, 1); STATES.splice(i, 1); EDITED.splice(i, 1);
             renderPreviews();
         }
 
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
         // STEP 2 — Editor
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
         function initEditor() {
             buildFilterGrid();
             buildAdjControls();
-            renderEditorState();
+            renderEditorUI();
         }
-
         function buildFilterGrid() {
             const grid = document.getElementById('filterGrid');
             grid.innerHTML = '';
-            // Generate previews dari foto pertama
             const url = URL.createObjectURL(FILES[curIdx]);
             FILTERS.forEach((f, i) => {
                 const d = document.createElement('div');
-                d.className = `filter-thumb${f.css === S().filter ? ' active' : ''}`;
+                d.className = `filter-item${f.css === S().filter ? ' active' : ''}`;
                 d.onclick = () => { S().filter = f.css; highlightFilter(i); drawCanvas(); };
-                d.innerHTML = `
-                <img src="${url}" style="filter:${f.css}">
-                <span>${f.name}</span>
-            `;
+                d.innerHTML = `<img src="${url}" style="filter:${f.css}"><span>${f.name}</span>`;
                 grid.appendChild(d);
             });
         }
-
         function highlightFilter(active) {
-            document.querySelectorAll('.filter-thumb').forEach((el, i) => {
-                el.classList.toggle('active', i === active);
-            });
+            document.querySelectorAll('.filter-item').forEach((el, i) => el.classList.toggle('active', i === active));
         }
-
         function buildAdjControls() {
             const c = document.getElementById('adjControls');
             c.innerHTML = '';
             ADJS.forEach(a => {
-                const val = S()[a.id];
                 c.innerHTML += `
                 <div class="adj-row">
                     <div class="adj-head">
                         <span>${a.label}</span>
-                        <small id="v-${a.id}">${val}</small>
+                        <small id="v-${a.id}">${S()[a.id]}</small>
                     </div>
-                    <input type="range" min="${a.min}" max="${a.max}" value="${val}"
+                    <input type="range" min="${a.min}" max="${a.max}" value="${S()[a.id]}"
                            oninput="setAdj('${a.id}',+this.value)">
-                </div>
-            `;
+                </div>`;
             });
         }
-
-        function renderEditorState() {
+        function renderEditorUI() {
             document.getElementById('eIdx').textContent = curIdx + 1;
             document.getElementById('eTot').textContent = FILES.length;
 
-            // Thumbnails
             const tc = document.getElementById('eThumbs');
             tc.innerHTML = '';
             FILES.forEach((f, i) => {
@@ -613,23 +612,19 @@
                 b.type = 'button';
                 b.className = `flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${i === curIdx ? 'border-violet-500' : 'border-transparent opacity-50'}`;
                 b.innerHTML = `<img src="${URL.createObjectURL(f)}" class="w-full h-full object-cover">`;
-                b.onclick = () => { curIdx = i; syncControls(); drawCanvas(); renderEditorState(); };
+                b.onclick = () => { curIdx = i; buildFilterGrid(); buildAdjControls(); renderEditorUI(); };
                 tc.appendChild(b);
             });
 
-            // Sync crop buttons
-            document.querySelectorAll('.ratio-btn').forEach(b => {
-                b.classList.toggle('active', b.dataset.crop === S().crop);
-            });
-
+            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b.dataset.crop === S().crop));
             drawCanvas();
         }
-
-        function syncControls() {
-            buildFilterGrid();
-            buildAdjControls();
+        function buildFilter(s) {
+            let f = `brightness(${s.br}%) contrast(${s.cn}%) saturate(${s.st}%)`;
+            if (s.ex !== 100) f += ` brightness(${s.ex}%)`;
+            if (s.filter) f += ' ' + s.filter;
+            return f;
         }
-
         function getCanvasDims(iw, ih, crop) {
             if (crop === 'orig') return [iw, ih];
             const ratios = { '1x1': [1, 1], '4x5': [4, 5], '16x9': [16, 9] };
@@ -638,21 +633,11 @@
             if (iw / ih > r) return [Math.round(ih * r), ih];
             return [iw, Math.round(iw / r)];
         }
-
-        function buildFilter(s) {
-            let f = `brightness(${s.br}%) contrast(${s.cn}%) saturate(${s.st}%)`;
-            if (s.ex !== 100) f += ` brightness(${s.ex}%)`;
-            if (s.filter) f += ' ' + s.filter;
-            return f;
-        }
-
         function drawCanvas() {
             const s = S();
-            const f = FILES[curIdx];
             const img = new Image();
             img.onload = () => {
-                let iw = img.naturalWidth;
-                let ih = img.naturalHeight;
+                let iw = img.naturalWidth, ih = img.naturalHeight;
                 if (s.rot === 90 || s.rot === 270) [iw, ih] = [ih, iw];
                 const [cw, ch] = getCanvasDims(iw, ih, s.crop);
                 canvas.width = cw; canvas.height = ch;
@@ -664,34 +649,25 @@
                 ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
                 ctx.restore();
             };
-            img.src = URL.createObjectURL(f);
+            img.src = URL.createObjectURL(FILES[curIdx]);
         }
-
         function setCrop(val, btn) {
             S().crop = val;
             document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('active', b === btn));
             drawCanvas();
         }
-
-        function doRotate(deg) {
-            S().rot = (S().rot + deg) % 360;
+        function doRotate(deg, reset = false) {
+            S().rot = reset ? 0 : (S().rot + deg) % 360;
             drawCanvas();
         }
-
-        function resetRotate() {
-            S().rot = 0;
-            drawCanvas();
-        }
-
         function setAdj(id, val) {
             S()[id] = val;
             const el = document.getElementById(`v-${id}`);
             if (el) el.textContent = val;
             drawCanvas();
         }
-
-        function prevPhoto() { if (curIdx > 0) { curIdx--; syncControls(); renderEditorState(); } }
-        function nextPhoto() { if (curIdx < FILES.length - 1) { curIdx++; syncControls(); renderEditorState(); } }
+        function prevPhoto() { if (curIdx > 0) { curIdx--; buildFilterGrid(); buildAdjControls(); renderEditorUI(); } }
+        function nextPhoto() { if (curIdx < FILES.length - 1) { curIdx++; buildFilterGrid(); buildAdjControls(); renderEditorUI(); } }
 
         async function applyEdit() {
             const btn = document.getElementById('applyBtn');
@@ -706,35 +682,44 @@
             btn.disabled = false;
             btn.style.background = 'rgba(16,185,129,.3)';
             btn.style.borderColor = 'rgba(16,185,129,.4)';
-            btn.innerHTML = `<svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Diterapkan`;
+            btn.innerHTML = `<svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg> Diterapkan`;
             setTimeout(() => {
                 btn.style.background = 'rgba(124,58,237,.35)';
                 btn.style.borderColor = 'rgba(124,58,237,.45)';
                 btn.textContent = 'Terapkan ke Foto Ini';
+                btn.disabled = false;
             }, 1800);
             renderPreviews();
         }
 
-        // ═══════════════════════════════════════════
-        // STEP 3 — Build file input
-        // ═══════════════════════════════════════════
+        // ═══════════════════════════════════
+        // STEP 3 — Build file input untuk form
+        // ═══════════════════════════════════
         async function buildFileSlot() {
-            // Foto yang belum diedit, pakai original
+            // Foto yang belum di-edit pakai original
             for (let i = 0; i < FILES.length; i++) {
                 if (!EDITED[i]) EDITED[i] = FILES[i];
             }
             const dt = new DataTransfer();
             EDITED.forEach(f => { if (f) dt.items.add(f); });
+
             const slot = document.getElementById('fileSlot');
             slot.innerHTML = '';
             const inp = document.createElement('input');
-            inp.type = 'file'; inp.name = 'photos[]'; inp.multiple = true;
-            inp.style.display = 'none'; inp.files = dt.files;
+            inp.type = 'file';
+            inp.name = 'photos[]';
+            inp.multiple = true;
+            inp.style.display = 'none';
+            inp.files = dt.files;
             slot.appendChild(inp);
         }
 
+        // Submit
         document.getElementById('uForm').addEventListener('submit', async e => {
             e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Mengupload...';
             await buildFileSlot();
             e.target.submit();
         });
