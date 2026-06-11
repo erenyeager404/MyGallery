@@ -1,59 +1,135 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# MyGallery
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Panduan ini menjelaskan cara setup ulang proyek MyGallery di komputer lain.
 
-## About Laravel
+## Prasyarat
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Pastikan lingkungan pengembangan sudah terpasang:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.1 atau lebih tinggi
+- Composer
+- Node.js dan npm/yarn
+- Database MySQL atau MariaDB
+- Server lokal seperti Laragon / XAMPP / Valet
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Clone Repository
 
-## Learning Laravel
+1. Clone repo ke folder lokal:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+```bash
+git clone <URL_REPO> MyGallery
+cd MyGallery
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. Copy file konfigurasi environment:
 
-## Laravel Sponsors
+```bash
+copy .env.example .env
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Install Dependensi
 
-### Premium Partners
+1. Install dependensi PHP:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+composer install
+```
 
-## Contributing
+2. Install dependensi JavaScript:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+npm install
+```
 
-## Code of Conduct
+atau jika pakai yarn:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+yarn install
+```
 
-## Security Vulnerabilities
+## Konfigurasi Environment
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Buka file `.env` dan sesuaikan:
 
-## License
+- `APP_NAME=MyGallery`
+- `APP_URL=http://localhost`
+- `DB_CONNECTION=mysql`
+- `DB_HOST=127.0.0.1`
+- `DB_PORT=3306`
+- `DB_DATABASE=nama_database_anda`
+- `DB_USERNAME=user_database`
+- `DB_PASSWORD=password_database`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Generate Application Key
+
+```bash
+php artisan key:generate
+```
+
+## Migrasi dan Seed Database
+
+Jalankan migrasi database:
+
+```bash
+php artisan migrate
+```
+
+Jika ingin mengisi data awal (seed):
+
+```bash
+php artisan db:seed
+```
+
+> Jika menggunakan database kosong, pastikan database sudah dibuat terlebih dahulu melalui phpMyAdmin atau command line.
+
+## Storage Link
+
+Buat symbolic link agar file foto bisa diakses dari `public/storage`:
+
+```bash
+php artisan storage:link
+```
+
+## Build Aset Frontend
+
+Untuk mengompilasi file CSS/JS:
+
+```bash
+npm run build
+```
+
+Untuk mode development dengan hot reload (opsional):
+
+```bash
+npm run dev
+```
+
+## Jalankan Server Lokal
+
+```bash
+php artisan serve
+```
+
+Lalu buka di browser:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Hal yang Perlu Dicek Jika Error
+
+- Pastikan file `.env` sudah benar
+- Pastikan database berhasil terhubung
+- Pastikan folder `storage` dan `bootstrap/cache` memiliki izin tulis
+- Jalankan ulang `composer install` jika ada dependensi hilang
+
+## Catatan
+
+- Gunakan versi PHP yang sesuai dengan pengaturan `composer.json`
+- Jika menggunakan Laragon, pastikan `Document Root` diarahkan ke folder `MyGallery/public`
+- Jika ada masalah upload foto, periksa konfigurasi `FILESYSTEM_DRIVER` di `.env`
+
+---
+
+Jika butuh bantuan lebih lanjut, tambahkan dokumentasi atau langkah instalasi khusus sesuai konfigurasi server yang digunakan.
